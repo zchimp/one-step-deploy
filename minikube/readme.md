@@ -38,11 +38,13 @@ useradd kubetest
 passwd kubetest
 # 添加用户组到docker组
 sudo usermod -aG docker $USER && newgrp docker
-# 切换到普通用户
-su kubetest
+
 # 创建/etc/kubernates,并且赋予普通用户权限
 mkdir /etc/kubernetes/
 chown -R kubetest /etc/kubernetes/
+
+# 切换到普通用户
+su kubetest
 ```
 切换到普通用户后，启动minikube，并且指定驱动为docker
 ```
