@@ -15,3 +15,10 @@ yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/d
 ```
 yum install docker-ce docker-ce-cli containerd.io
 ```
+## FAQ
+### 推送远程仓库报错`http: server gave HTTP response to HTTPS client`
+在```/etc/docker/daemon.json ```文件中增加
+```
+{ "insecure-registries":["host:port"] }
+```
+重启docker服务
