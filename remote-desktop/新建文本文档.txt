@@ -1,0 +1,60 @@
+使用要求
+
+最低硬件要求：CPU核心≥1核心，内存≥1 GB，磁盘空间≥15 GB
+
+系统为全新CentOS 7 最小化安装版本
+
+请尽量不要使用 OpenVZ 虚拟化的机器运行此脚本
+
+脚本功能
+
+只需一键，即可为CentOS安装桌面环境和RDP远程桌面连接。
+
+为您的Linux系统运行Windows应用程序。脚本自动帮你安装Wine X64和X86，现在可以在Linux上运行Windows应用程序。例如：Telegram、WeChat、Thunder
+
+默认创建3GB交换内存。 避免内存不足导致的错误。（交换位置：/var/swapd）
+
+自动安装中文输入环境，中文支持。
+
+安装人们推荐的软件，例如浏览器和输入法。（包含Chrome，Firefox）
+
+安装远程桌面客户端。（支持RDP/SSH/NX/SFTP/VNC/XDMCP协议）
+
+使用教程
+
+请仔细阅读上述详情后，使用Root用户运行如下脚本：
+
+curl -sSL https://raw.githubusercontent.com/MeowLove/CentOS-One-click-Installation-of-Desktop-Environment-and-Remote-Desktop-Connection-RDP/master/download/main/install.sh | bash
+
+完成后。你就可以连接IP:3389（通过远程桌面连接）。默认RDP登陆账号：root，密码：你的root密码。
+
+其他说明
+
+创建新用户时，请授权新用户RDP远程连接。 你需要这样做。（我将演示授权新用户CXT）
+
+① 首先你应该在[控制中心]-[用户和组群]创建新用户。
+
+② 使用root用户切换进入到CXT的目录。cd /home/CXT
+
+③ 输入下面的命令(你需要注意，下面命令中引号是”英文状态单引号”。)
+
+touch ./.Xclients
+
+echo 'mate-session' > ./.Xclients
+
+chmod a+x ./.Xclients
+
+几个常见问题
+
+1、wine下QQ无法输入：在终端输入命令winecfg打开wine设置
+
+增加程序设置中浏览并添加QQ.exe
+
+切换标签而至“函数库”
+
+在新增函数库顶替中浏览并选择msvcp60,riched20,riched32
+
+确定后注销系统并重新登录即可
+
+2、中文输入法：系统-》控制-》输入法选择器-》ibus输入法即可。
+
