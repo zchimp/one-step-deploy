@@ -16,3 +16,17 @@ sudo systemctl restart docker
 4 退出SSH连接，重新登录
 ```
 
+# 查看内存占用前10名的程序
+```
+ps aux | sort -k4,4nr | head -n 10
+```
+
+# docker外执行命令
+```
+docker exec -it $DOCKER_ID /bin/bash -c 'cd /packages/detectron && python tools/train.py'
+```
+
+# sed 替换文件中的内容
+```
+sed -i "s/content1/content2/g" file_name
+```
