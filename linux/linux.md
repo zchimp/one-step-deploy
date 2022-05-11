@@ -30,3 +30,18 @@ docker exec -it $DOCKER_ID /bin/bash -c 'cd /packages/detectron && python tools/
 ```
 sed -i "s/content1/content2/g" file_name
 ```
+
+# 查看java的启动参数
+```
+jinfo -flags pid
+```
+
+# 查看所有用户组
+cat /etc/group
+
+# shell脚本任何一个语句返回非真的值，则退出bash
+set -e
+或
+command || (echo "command failed"; exit 1);
+或
+if ! command; then echo "command failed";exit 1;fi
