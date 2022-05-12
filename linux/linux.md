@@ -37,11 +37,26 @@ jinfo -flags pid
 ```
 
 # 查看所有用户组
+```
 cat /etc/group
-
+```
 # shell脚本任何一个语句返回非真的值，则退出bash
+```
 set -e
 或
 command || (echo "command failed"; exit 1);
 或
 if ! command; then echo "command failed";exit 1;fi
+```
+
+# 查看域名对应的ip地址
+```
+nslookup baidu.com
+```
+# 测试端口连通性
+```
+# udp
+nc -z -v -u <hostname/IP address> <port number>
+# tcp
+nc -z -v <hostname/IP address> <port number>
+```
