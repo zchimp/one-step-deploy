@@ -30,3 +30,15 @@ apt-key update
 
 # 删除已安装包（不保留配置文件)。
 apt-get purge / apt-get --purge remove
+
+# 删除为了满足依赖而安装的，但现在不再需要的软件包（包括已安装包），保留配置文件
+apt-get autoremove
+
+# 删除已安装的软件包（保留配置文件），不会删除依赖软件包，且保留配置文件
+apt-get remove
+
+# 只会删除 /var/cache/apt/archives/ 已经过期的deb
+apt-get autoclean 
+
+# 将 /var/cache/apt/archives/ 的 所有 deb 删掉
+apt-get clean

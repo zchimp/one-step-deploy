@@ -60,3 +60,24 @@ nc -z -v -u <hostname/IP address> <port number>
 # tcp
 nc -z -v <hostname/IP address> <port number>
 ```
+
+# 生成随机字符串的方法
+```
+echo $RANDOM
+# 1908
+
+openssl rand -base64 8
+# 0zbE/1d2n0E=  8位字符串base64加密
+
+cat /proc/sys/kernel/random/uuid  | md5sum |cut -c 1-9 
+# 362b84efe 1-9 取8位，最后的9是结束
+
+head /dev/urandom |cksum |md5sum |cut -c 1-9
+# 89da0c70b
+
+date +%s%N | md5sum |cut -c 1-9
+# 4738152c2
+```
+
+# 忽略错误信息
+"2> /dev/null" 代表忽略掉错误提示信息
