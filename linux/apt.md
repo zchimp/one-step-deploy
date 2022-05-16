@@ -20,13 +20,13 @@ sudo apt-cache search <keyword>
 sudo apt list --installed
 
 # 列出已保存在系统中key。
-apt-key list          
+apt-key list
 # 把下载的key添加到本地trusted数据库中。
-apt-key add keyname   
+apt-key add keyname
 # 从本地trusted数据库删除key。
 apt-key del keyname   
 # 更新本地trusted数据库，删除过期没用的key。
-apt-key update        
+apt-key update
 
 # 删除已安装包（不保留配置文件)。
 apt-get purge / apt-get --purge remove
