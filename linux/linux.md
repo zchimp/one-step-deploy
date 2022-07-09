@@ -81,3 +81,21 @@ date +%s%N | md5sum |cut -c 1-9
 
 # 忽略错误信息
 "2> /dev/null" 代表忽略掉错误提示信息
+
+# 判断进程是否存在
+```
+count=`ps -ef |grep xxx |grep -v "grep" |wc -l`
+```
+
+# curl保存文件
+```
+curl -O http://127.0.0.1:8000/test.sh
+```
+
+# ssh保持长时间连接
+```
+# 更新服务端（并重新启动sshd）
+echo "ClientAliveInterval 60" | sudo tee -a /etc/ssh/sshd_config
+# 更新客户端配置
+echo "ServerAliveInterval 60" >> ~/.ssh/config 
+```
