@@ -1,0 +1,60 @@
+# prometheus-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-server
+  namespace: prometheus
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      component: server
+  strategy:
+    type: Recreate
+    #matchExpressions:
+    #- {key: app, operator: In, values: [prometheus]}
+    #- {key: component, operator: In, values: [server]}
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: server
+      annotations:
+        prometheus.io/scrape: 'false'
+    spec:
+      # nodeName: node1
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: quay.io/prometheus/prometheus:v2.51.2
+        imagePullPolicy: IfNotPresent
+        command:
+          - prometheus
+          - --config.file=/etc/prometheus/prometheus.yml
+          - --storage.tsdb.path=/prometheus
+          - --storage.tsdb.retention=720h
+          - --web.enable-lifecycle
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/prometheus
+          name: prometheus-config
+        - mountPath: /prometheus/
+          name: prometheus-storage-volume
+        - mountPath: /etc/localtime
+          name: date-config
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+        - name: prometheus-storage-volume
+          hostPath:
+           path: /data
+           type: Directory
+        - name: date-config
+          hostPath:
+            path: /etc/localtime

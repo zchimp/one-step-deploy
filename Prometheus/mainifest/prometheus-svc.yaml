@@ -1,0 +1,18 @@
+# prometheus-svc.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: prometheus
+  labels:
+    app: prometheus
+spec:
+  type: NodePort
+  ports:
+    - port: 9090
+      nodePort: 31090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app: prometheus
+    component: server
