@@ -22,6 +22,18 @@ EOF
 
 sudo yum install influxdb2
 ```
+初始化设置
+```
+influx setup \
+  --username admin \
+  --password admin12345~ \
+  --org monitor \
+  --bucket my_data \
+  --retention 720h \  # 30天数据保留，可改为 infinite 永久保留
+  --token my_admin_token_2024_influxdb \  # 管理员API Token，自定义即可
+  --force  # 跳过确认提示，直接执行初始化
+```
+
 docker方式
 ```
 docker pull influxdb:2.1.1
@@ -82,4 +94,28 @@ telegraf --config telegraf.conf
 
 # 只运行cpu和内存采集，influxdb格式输出插件
 telegraf --config telegraf.conf --input-filter cpu:mem --output-filter influxdb
+```
+
+categraf上报  
+categraf-v0.4.32-linux-amd64
+修改conf/write/influxdb.toml
+```
+# 启用 InfluxDB 写入
+enable = true
+
+# InfluxDB 2.8 服务地址（替换为你的服务器IP）
+urls = ["http://<服务器IP>:8086"]
+
+# InfluxDB 2.x 专属配置（对应初始化的信息）
+org = "monitor"          # 组织名称
+bucket = "my_data"    # 存储桶名称
+token = "my_admin_token_2024_influxdb"  # 管理员 Token
+
+# 写入超时时间
+timeout = "5s"
+
+# 可选配置：批量写入大小、重试次数
+batch_size = 1000
+batch_wait = "1s"
+retries = 3
 ```

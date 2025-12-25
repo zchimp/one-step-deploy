@@ -244,3 +244,150 @@ spec:
 
 # 测试访问
 {ip}:31090
+
+# 部署 kube-state-metrics组件
+```
+# state-metrics.yaml
+apiVersion: v1
+kind: ServiceAccount           #服务账号
+metadata:
+  name: kube-state-metrics
+  namespace: prometheus
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole        #集群角色
+metadata:
+  name: kube-state-metrics
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods", "services", "resourcequotas", "replicationcontrollers", "limitranges", "persistentvolumeclaims", "persistentvolumes", "namespaces", "endpoints"]
+  verbs: ["list", "watch"]
+- apiGroups: ["extensions"]
+  resources: ["daemonsets", "deployments", "replicasets"]
+  verbs: ["list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["statefulsets"]
+  verbs: ["list", "watch"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs", "jobs"]
+  verbs: ["list", "watch"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding  #集群角色绑定
+metadata:
+  name: kube-state-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-state-metrics
+subjects:
+- kind: ServiceAccount
+  name: kube-state-metrics
+  namespace: prometheus
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-state-metrics
+  namespace: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-state-metrics
+  template:
+    metadata:
+      labels:
+        app: kube-state-metrics
+    spec:
+      serviceAccountName: kube-state-metrics
+      containers:
+      - name: kube-state-metrics
+        image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.9.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: 'true'
+  name: kube-state-metrics
+  namespace: prometheus
+  labels:
+    app: kube-state-metrics
+spec:
+  ports:
+  - name: kube-state-metrics
+    port: 8080
+    protocol: TCP
+  selector:
+    app: kube-state-metrics
+```
+# 部署grafana服务
+```
+# grafana.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: prometheus
+  labels:
+    app: grafana
+spec:
+  selector:
+    matchLabels:
+      app: grafana
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/quay.io/devtron/grafana:7.3.1
+        name: grafana
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GF_AUTH_BASIC_ENABLED
+          value: "true"
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "false"
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: 3000
+        volumeMounts:
+        #- name: grafana-test
+        #  mountPath: /var/lib/grafana
+        - name: ca-certificates
+          mountPath: /etc/ssl/certs
+          readOnly: true
+      volumes:
+      - name: ca-certificates
+        hostPath:
+          path: /etc/ssl/certs
+      #- name: grafana-test
+      #  hostPath:
+      #    path: /var/lib/grafana         #挂载点，(这里的挂载点也需要手动创建，并授权)
+      #    type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: prometheus
+  labels:
+    app: grafana
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      nodePort: 30003
+  selector:
+    app: grafana
+```

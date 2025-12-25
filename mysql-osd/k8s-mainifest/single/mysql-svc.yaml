@@ -1,0 +1,14 @@
+# mysql service配置
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: database
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: mysql
+  clusterIP: None # Headless Service

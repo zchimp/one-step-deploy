@@ -1,0 +1,13 @@
+# mysql-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage # 根据集群存储类调整
+  resources:
+    requests:
+      storage: 10Gi

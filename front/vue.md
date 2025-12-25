@@ -28,3 +28,14 @@
 ├── index.html                 // html模板
 └── package.json               // package.json
 
+# 初始化
+```
+npm create vue@latest
+
+cd <your-project-name>
+npm install
+npm run dev
+
+npm run build
+
+```

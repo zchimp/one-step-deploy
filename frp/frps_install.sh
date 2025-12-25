@@ -1,12 +1,26 @@
+#!/bin/bash
+version='0.54.0'
+package="frp_${version}_linux_$arch.tar.gz"
 
-https://github.com/fatedier/frp
+# 获取系统架构
+machine_arch=$(uname -m)
 
-wget https://github.com/fatedier/frp/releases/download/v0.54.0/frp_0.54.0_linux_amd64.tar.gz
+# 判断架构并设置变量
+if [ "$machine_arch" = "x86_64" ]; then
+    arch="amd64"
+else
+    arch="arm64"
+fi
 
-tar -zxf frp_0.54.0_linux_amd64.tar.gz  
-cd frp_0.54.0_linux_amd64/  
-vim frps.toml  
-```
+
+echo "架构变量 arch 的值为: $arch"
+wget https://github.com/fatedier/frp/releases/download/v${version}/frp_${version}_linux_$arch.tar.gz
+
+tar -zxf frp_${version}_linux_$arch.tar.gz
+cd frp_${version}_linux_$arch/
+
+
+cat <<EOF | sudo tee ./frps.toml
 # frps.toml
 bindPort = 7000 				# 服务端与客户端通信端口
 
@@ -19,14 +33,11 @@ webServer.addr = "0.0.0.0"		# 后台管理地址
 webServer.port = 7500 			# 后台管理端口
 webServer.user = "admin"		# 后台登录用户名
 webServer.password = "admin"	# 后台登录密码
-```
+EOF
 
-./frps -c frps.toml  
-后台运行： nohup ./frps -c frps.toml &  
+nohup ./frps -c frps.toml &  
 
-wget https://github.com/fatedier/frp/releases/download/v0.54.0/frp_0.54.0_linux_arm64.tar.gz
-
-```
+cat <<EOF | sudo tee ./frpc.toml
 # frpc.toml
 transport.tls.enable = true
 serverAddr = "47.97.182.156"
@@ -46,16 +57,7 @@ name = "ssh"
 type = "tcp"
 localIP = "127.0.0.1"
 localPort = 22
-remotePort = 6000
-
-```
+remotePort = 40022
+EOF
 
 nohup ./frpc -c frpc.toml &
-
-
-# 热加载
-frpc reload -c ./frpc.ini
-
-# 添加启动项
-crontab -e
-@reboot sleep 300 && /home/start.sh

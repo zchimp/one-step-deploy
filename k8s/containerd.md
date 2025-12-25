@@ -101,3 +101,5 @@ tar xf buildkit-v0.10.4.linux-amd64.tar.gz -C /tmp/buildkit/
 mv /tmp/buildkit/bin/* /usr/bin/
 rm -rf /tmp/buildkit
 ```
+
+ctr images push --user admin --platform linux/amd64  --plain-http  local.harbor.com:8888/library/ubuntu:22.04
