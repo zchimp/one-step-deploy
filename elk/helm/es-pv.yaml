@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  # PV 名称可自定义，建议和 PVC 关联便于识别
+  name: elasticsearch-master-pv-0
+  labels:
+    # 可添加标签用于匹配 PVC（非必须，但便于管理）
+    app: elasticsearch-master
+spec:
+  # 必须和 PVC 的 accessModes 一致：ReadWriteOnce
+  accessModes:
+  - ReadWriteOnce
+  # 存储容量必须 ≥ PVC 的 requests.storage（此处为 30Gi）
+  capacity:
+    storage: 30Gi
+  # 存储模式必须和 PVC 一致：Filesystem
+  volumeMode: Filesystem
+  # 回收策略：Delete（删除PV时删除存储数据）/Retain（保留数据）/Recycle（清理数据）
+  persistentVolumeReclaimPolicy: Delete
+  # 存储类型：此处用 hostPath（单机），生产替换为 nfs/ceph 等
+  hostPath:
+    # 节点上的物理路径，需确保该路径存在且权限正确（建议提前创建）
+    path: /data/elasticsearch/master-0
+    type: DirectoryOrCreate
+  # 绑定策略：WaitForFirstConsumer（等待PVC绑定后再创建存储），适合动态调度
+  storageClassName: ""  # 空字符串表示不使用存储类，手动绑定
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # 指定PV绑定到特定节点（可选，根据集群情况调整）
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - zhaohui-1  # 替换为你的集群节点名称
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  # PV 名称可自定义，建议和 PVC 关联便于识别
+  name: elasticsearch-master-pv-1
+  labels:
+    # 可添加标签用于匹配 PVC（非必须，但便于管理）
+    app: elasticsearch-master
+spec:
+  # 必须和 PVC 的 accessModes 一致：ReadWriteOnce
+  accessModes:
+  - ReadWriteOnce
+  # 存储容量必须 ≥ PVC 的 requests.storage（此处为 30Gi）
+  capacity:
+    storage: 30Gi
+  # 存储模式必须和 PVC 一致：Filesystem
+  volumeMode: Filesystem
+  # 回收策略：Delete（删除PV时删除存储数据）/Retain（保留数据）/Recycle（清理数据）
+  persistentVolumeReclaimPolicy: Delete
+  # 存储类型：此处用 hostPath（单机），生产替换为 nfs/ceph 等
+  hostPath:
+    # 节点上的物理路径，需确保该路径存在且权限正确（建议提前创建）
+    path: /data/elasticsearch/master-1
+    type: DirectoryOrCreate
+  # 绑定策略：WaitForFirstConsumer（等待PVC绑定后再创建存储），适合动态调度
+  storageClassName: ""  # 空字符串表示不使用存储类，手动绑定
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # 指定PV绑定到特定节点（可选，根据集群情况调整）
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - zhaohui-2  # 替换为你的集群节点名称
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  # PV 名称可自定义，建议和 PVC 关联便于识别
+  name: elasticsearch-master-pv-2
+  labels:
+    # 可添加标签用于匹配 PVC（非必须，但便于管理）
+    app: elasticsearch-master
+spec:
+  # 必须和 PVC 的 accessModes 一致：ReadWriteOnce
+  accessModes:
+  - ReadWriteOnce
+  # 存储容量必须 ≥ PVC 的 requests.storage（此处为 30Gi）
+  capacity:
+    storage: 30Gi
+  # 存储模式必须和 PVC 一致：Filesystem
+  volumeMode: Filesystem
+  # 回收策略：Delete（删除PV时删除存储数据）/Retain（保留数据）/Recycle（清理数据）
+  persistentVolumeReclaimPolicy: Delete
+  # 存储类型：此处用 hostPath（单机），生产替换为 nfs/ceph 等
+  hostPath:
+    # 节点上的物理路径，需确保该路径存在且权限正确（建议提前创建）
+    path: /data/elasticsearch/master-2
+    type: DirectoryOrCreate
+  # 绑定策略：WaitForFirstConsumer（等待PVC绑定后再创建存储），适合动态调度
+  storageClassName: ""  # 空字符串表示不使用存储类，手动绑定
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        # 指定PV绑定到特定节点（可选，根据集群情况调整）
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - zhaohui-3  # 替换为你的集群节点名称

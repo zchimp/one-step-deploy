@@ -69,6 +69,7 @@ externalAccess:
 sudo mkdir -p /data/kafka-0
 sudo mkdir -p /data/kafka-1
 sudo mkdir -p /data/kafka-2
+chmod 777 /data/kafka-*
 ```
 # 创建pv和storage
 kubectl apply -f storage-kafka.yaml
