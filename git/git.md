@@ -5,6 +5,24 @@ git config --global user.name [username]
 配置邮箱
 git config --global user.email [email]
 
+# 配置ssh
+## 替换为你的Git账号邮箱
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+## 启动SSH代理（Windows需先执行，macOS/Linux可跳过）
+eval "$(ssh-agent -s)"
+
+## 添加私钥到代理
+ssh-add ~/.ssh/id_rsa
+
+### macOS/Linux
+cat ~/.ssh/id_rsa.pub | pbcopy  # macOS直接复制到剪贴板
+cat ~/.ssh/id_rsa.pub           # Linux查看内容后手动复制
+
+### Windows（Git Bash）
+cat ~/.ssh/id_rsa.pub           # 查看内容后手动复制
+### 或Windows PowerShell
+Get-Content ~/.ssh/id_rsa.pub | Set-Clipboard  # 直接复制到剪贴板
 
 # 分支
 **git branch**  

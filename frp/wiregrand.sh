@@ -1,10 +1,7 @@
-# 保存镜像
-docker save 
-
 docker run --detach \
   --name wg-easy \
   --env LANG=chs \
-  --env WG_HOST=47.97.182.156 \
+  --env WG_HOST={your_ip_addr} \
   --env PASSWORD_HASH='$2a$12$jTwFJ8k7hlEFDoGKd2fRuejUv82i7ilzYN6fyOQclblNcHUjLvL9O' \
   --env PORT=51821 \
   --env WG_PORT=51820 \
@@ -17,5 +14,5 @@ docker run --detach \
   --sysctl 'net.ipv4.ip_forward=1' \
   --restart unless-stopped \
   ghcr.io/wg-easy/wg-easy
-$2a$12$jTwFJ8k7hlEFDoGKd2fRuejUv82i7ilzYN6fyOQclblNcHUjLvL9O
-\$2b\$12\$coPqCsPtcFO.Ab99xylBNOW4.Iu7OOA2/ZIboHN6/oyxca3MWo7fW
+
+ # This_is_wiregrand_password
