@@ -255,3 +255,8 @@ image: busybox 改成 image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/quay.io/pr
 
 helm install nightingale ./n9e-helm -n n9e --create-namespace
 helm uninstall  nightingale -n n9e
+
+页面外部访问需要修改nightingale-center的service，暴露nodePort
+默认的prometheus数据上报需要开启nightingale-prometheus的service，暴露NodePort
+
+页面默认账号密码 root/root.2020
