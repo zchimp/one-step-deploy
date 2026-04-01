@@ -7,21 +7,53 @@ helm repo add bitnami2 "https://helm-charts.itboon.top/bitnami" --force-update
 helm repo update
 
 # 基础部署（单节点/测试环境）
-```
+## 使用命令创建单节点es
+```shell
 # 部署单节点 Elasticsearch
 helm install elasticsearch bitnami2/elasticsearch --version 22.0.10 \
-  --set global.security.allowInsecureImages=true \
-  --set image.registry=swr.cn-north-4.myhuaweicloud.com \
-  --set image.repository=ddn-k8s/docker.io/bitnami/elasticsearch \
-  --set image.tag=9.0.3-debian-12-r1 \
   --namespace logging \
   --create-namespace \
+  --set global.security.allowInsecureImages=true \
+  --set global.defaultStorageClass=es-local-path \
+  --set global.imageRegistry=swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io \
+  --set image.repository=bitnami/elasticsearch \
+  --set image.tag=9.0.3-debian-12-r1 \
+  --set metrics.image.repository=bitnami/elasticsearch-exporter \
+  --set metrics.image.tag=1.9.0-debian-12-r11 \
+  --set volumePermissions.image.repository=bitnami/os-shell \
+  --set volumePermissions.image.tag=12-debian-12-r47 \
+  --set sysctlImage.repository=bitnami/os-shell \
+  --set sysctlImage.tag=12-debian-12-r47 \
+  --set copyTlsCerts.image.repository=bitnami/os-shell \
+  --set copyTlsCerts.image.tag=12-debian-12-r47 \
+  --set master.persistence.enabled=false \
+  --set data.persistence.enabled=false \
   --set replicas=1 \
   --set resources.requests.cpu=1 \
   --set resources.requests.memory=1Gi \
   --set resources.limits.cpu=2 \
-  --set resources.limits.memory=4Gi \
-  --set persistence.size=10Gi
+  --set resources.limits.memory=4Gi 
+```
+```
+# es-svc-nodeport.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-svc
+  namespace: logging
+spec:
+  selector:
+    app.kubernetes.io/instance: elasticsearch
+  type: NodePort  # 改成 NodePort
+  ports:
+    - name: http
+      port: 9200
+      targetPort: 9200
+      nodePort: 30920  # 可选固定端口，不写则自动分配
+    - name: transport
+      port: 9300
+      targetPort: 9300
+      nodePort: 30930
 ```
 
 # 集群
@@ -31,7 +63,7 @@ helm install elasticsearch bitnami2/elasticsearch --version 22.0.10 \
 mkdir /data/es1 && chmod 777 /data/es1
 mkdir /data/es2 && chmod 777 /data/es2
 mkdir /data/es3 && chmod 777 /data/es3
-```
+```shell
 # storage-es.yaml
 # 1. 定义本地存储的 StorageClass（仅用于关联 PV，无动态供应能力）
 apiVersion: storage.k8s.io/v1
@@ -115,7 +147,7 @@ spec:
 ```
 
 ## 自定义chart配置文件
-```
+```shell
 # es-values.yaml
 # 集群基础配置
 global:
@@ -189,4 +221,5 @@ helm install elasticsearch bitnami2/elasticsearch --version 22.0.10 -f es-values
 
 # 卸载
 helm uninstall elasticsearch -n logging
+kubectl delete pvc -n logging $(kubectl get pvc -n logging | grep elastic | awk '{print $1}')
 kubectl delete -f storage-es.yaml
