@@ -37,3 +37,8 @@ kubectl run test-pod --image=hub.harbor.com/zchimp/pod-history-runtime-base:late
   # 创建并启动nginx Pod（--restart=Never 表示创建的是纯Pod，而非Deployment）
 kubectl run nginx-pod --image=nginx:latest --restart=Never
 kubectl run nginx-pod --image=hub.harbor.com/library/nginx:latest --restart=Never
+
+
+# 查看svc挂载在哪个pod上
+kubectl get endpoints <svc名称>
+kubectl get pod -o wide | grep <上面查到的IP>

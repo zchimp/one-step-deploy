@@ -13,8 +13,28 @@ helm search repo bitnami2/kafka --versions
 # 下载Chart包
 <!-- helm pull bitnami/kafka --version 29.3.6  -->
 
+# 一键启动，无存储3节点
+helm repo add bitnami2 "https://helm-charts.itboon.top/bitnami" --force-update
+helm repo update
+
+helm install kafka bitnami2/kafka --version 31.1.1 \
+  --namespace kafka \
+  --create-namespace \
+  --set global.storageClass="" \
+  --set global.security.allowInsecureImages=true \
+  --set controller.persistence.enabled=false \
+  --set controller.replicaCount=3 \
+  --set controller.resources.limits.cpu=1 \
+  --set controller.resources.limits.memory=2Gi \
+  --set zookeeper.persistence.enabled=false \
+  --set broker.persistence.enabled=false \
+  --set kraft.enabled=true \
+  --set image.registry=swr.cn-north-4.myhuaweicloud.com \
+  --set image.repository=ddn-k8s/docker.io/bitnami/kafka \
+  --set image.tag=3.9.0-debian-12-r4
+
 # values.yaml相应配置
-```
+```yaml
 global:
   security:
     # 允许非标准/自定义镜像，跳过校验
@@ -73,7 +93,7 @@ chmod 777 /data/kafka-*
 ```
 # 创建pv和storage
 kubectl apply -f storage-kafka.yaml
-```
+```yaml
 # storage-kafka.yaml
 ---
 # 1. 创建storageclass
@@ -155,9 +175,94 @@ kubectl delete pvc -n kafka data-kafka-controller-0 data-kafka-controller-1 data
 kubectl delete pv kafka-pv-0 kafka-pv-1 kafka-pv-2
 
 # 测试
-```
+```shell
+# 默认开启密码认证，获取密码
+kubectl get secret kafka-user-passwords -n kafka -o jsonpath='{.data.client-passwords}' | base64 -d ; echo
+
+# 创建一个topic
+kafka-topics.sh \
+  --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+  --create \
+  --topic otlp-logs \
+  --partitions 3 \
+  --replication-factor 1 \
+  --command-config <(cat <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+  username="user1" \
+  password="GZRVdypobC";
+EOF
+)
+
+# 查看已有topic
+kafka-topics.sh \
+  --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+  --list \
+  --command-config <(cat <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+username="user1" \
+password="GZRVdypobC";
+EOF
+)
+
+# 发送消费一下
+kafka-console-consumer.sh \
+  --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+  --topic otlp-logs \
+  --consumer.config <(cat <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+username="user1" \
+password="GZRVdypobC";
+EOF
+)
+
+kafka-console-producer.sh \
+  --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+  --topic otlp-logs \
+  --producer.config <(cat <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+username="user1" \
+password="GZRVdypobC";
+EOF
+)
+
+# 修改配置，设置保存1天+最大空间1GB
+kafka-configs.sh \
+  --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+  --alter --entity-type topics --entity-name otlp-logs \
+  --add-config retention.ms=86400000,retention.bytes=1073741824 \
+  --command-config <(cat <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+username="user1" \
+password="GZRVdypobC";
+EOF
+)
+
+# 查看配置
+kafka-topics.sh --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
+--describe --topic otlp-logs \
+--command-config <(cat <<EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+username="user1" \
+password="GZRVdypobC";
+EOF
+)
+
+# 内部url
+kafka.kafka.svc.cluster.local:9092
+
 # 创建一个pod
- 
 kubectl run kafka-client --restart='Never' --image swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/bitnami/kafka:3.9.0-debian-12-r4 --namespace kafka --command -- sleep infinity
  
 # 进入pod生产消息
@@ -172,4 +277,5 @@ kafka-console-consumer.sh \
   --bootstrap-server kafka.kafka.svc.cluster.local:9092 \
   --topic test \
   --from-beginning
+
 ```

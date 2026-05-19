@@ -223,3 +223,6 @@ helm install elasticsearch bitnami2/elasticsearch --version 22.0.10 -f es-values
 helm uninstall elasticsearch -n logging
 kubectl delete pvc -n logging $(kubectl get pvc -n logging | grep elastic | awk '{print $1}')
 kubectl delete -f storage-es.yaml
+
+# 测试
+kubectl run -it --rm --restart=Never test-es    --image=swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/yauritux/busybox-curl:latest    -n logging    -- curl http://elasticsearch-svc.logging.svc.cluster.local:9200

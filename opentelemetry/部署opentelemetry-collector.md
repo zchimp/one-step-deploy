@@ -1,5 +1,5 @@
 # helm部署
-```
+```shell
 # 添加 OpenTelemetry 官方仓库
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 
@@ -53,17 +53,20 @@ helm uninstall otel-collector -n otel
 ```
 
 # 修改配置
-```
+```shell
 helm get values otel-collector -n otel > current-values.yaml
 # 或者查看完整的渲染后模板（包含默认值）
 helm get manifest otel-collector -n otel | grep -A 50 "config:"
 
-
+# 编辑current-values.yaml，去除第一行USER-SUPPLIED VALUES
+# 更新配置
+helm upgrade otel-collector open-telemetry/opentelemetry-collector -n otel -f current-values.yaml
 ```
 
-# 写一个测试脚本去发送一个指标
-安装python依赖  
+# 写一个测试脚本去发送一个metric指标
+## 安装python依赖  
 pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc
+## 执行脚本
 ```python
 import time
 import random
@@ -122,3 +125,32 @@ finally:
     provider.shutdown()
 ```
 指标名称是example.counter，prometheus中使用example_counter_total查询
+
+# 模拟log指标
+## 安装python依赖 
+pip install --force-reinstall \
+opentelemetry-api \
+opentelemetry-sdk \
+opentelemetry-exporter-otlp-proto-grpc \
+opentelemetry-semantic-conventions
+## 执行脚本
+```python
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+from opentelemetry.sdk.resources import Resource
+
+logger_provider = LoggerProvider(resource=Resource(attributes={"service.name": "test"}))
+set_logger_provider(logger_provider)
+
+exporter = OTLPLogExporter(endpoint="192.168.3.201:30437", insecure=True)
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
+
+logger = logger_provider.get_logger(__name__)
+logger.emit(body="日志发送成功！")
+
+import time
+time.sleep(2)
+print("发送成功！")
+```
