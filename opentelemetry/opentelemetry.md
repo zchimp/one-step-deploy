@@ -1,0 +1,1 @@
+OpenTelemetry Collector 一共3 种运行模式：Agent（代理模式）、Gateway/Collector Service（网关模式）、Standalone（单机独立模式），核心区别：部署位置、数据接收源、上下游链路、适用场景。
