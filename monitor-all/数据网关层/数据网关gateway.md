@@ -23,6 +23,7 @@ mode: deployment
 replicaCount: 1
 
 image:
+  # 可以使用精简镜像，只包含core的精简版，contrib版本包含采集插件
   repository: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib"
   pullPolicy: IfNotPresent
   tag: "0.151.0"
