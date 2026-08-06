@@ -4,10 +4,11 @@
 ```shell
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 helm repo update
+
+helm search repo open-telemetry/opentelemetry-collector --versions
+# open-telemetry/opentelemetry-collector  0.155.0         0.151.0         OpenTelemetry Collector Helm chart for Kubernetes
+helm pull open-telemetry/opentelemetry-collector --version=0.155.0
 ```
-
-
-
 
 ```yaml
 # values-contrib.yaml

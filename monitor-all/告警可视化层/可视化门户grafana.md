@@ -22,7 +22,7 @@ sidecar:
     repository: kiwigrid/k8s-sidecar
     tag: 2.1.4
 
-# 不关闭需要修改目录权限之类的，不然更行或者重启会失败。
+# 不关闭需要修改目录权限之类的，不然更新或者重启会失败。
 initChownData:
   enabled: false
 
@@ -35,12 +35,13 @@ persistence:
 # 关闭随机密码，自定义admin密码
 adminPassword: "Admin@123"
 
-# Service改为ClusterIP，用Ingress访问
+# Service可改为ClusterIP，用Ingress访问
 service:
   type: NodePort
   nodePort: 3000
 
-# 5. 预置数据源（Prometheus/Loki/Jaeger，对接链路trace）
+# 可页面手动添加
+# 预置数据源（Prometheus/Loki/Jaeger，对接链路trace）
 # datasources:
 #   datasources.yaml:
 #     apiVersion: 1
@@ -67,5 +68,5 @@ service:
 ```
 
 ```shell
-helm install grafana grafana-10.4.0.tgz -f values-grafana.yaml -n monitoring --create-namespace
+helm upgrade --install grafana grafana-10.4.0.tgz -f values-grafana.yaml -n monitoring --create-namespace
 ```

@@ -56,21 +56,44 @@ config:
       limit_mib: 400
 
   exporters:
-    # 1. Trace 导出到 Jaeger (OTLP gRPC)
-    otlp/jaeger:
-      endpoint: "jaeger.monitoring.svc.cluster.local:4317"
-      tls:
-        insecure: true
+    # ======================
+    # 1. 链路追踪 Trace 导出
+    # ======================
 
-    # 2. Metrics 转为 Prometheus 格式，对外暴露端口供 Prom 拉取
+    # Trace 导出到 Jaeger (OTLP gRPC)
+    # otlp/jaeger:
+    #   endpoint: "jaeger.monitoring.svc.cluster.local:4317"
+    #   tls:
+    #     insecure: true
+    
+    # Trace 导出到 Tempo
+    otlp/tempo:
+        endpoint: "tempo.monitoring.svc.cluster.local:3200"
+        tls:
+          insecure: true
+    
+    # ======================
+    # 2. 指标 Metrics 导出
+    # ======================
+
+    # Metrics 转为 Prometheus 格式，对外暴露端口供 Prom 拉取
+    # prometheusremotewrite:
+    #   endpoint: "http://prom-prometheus-server.monitoring.svc.cluster.local:9090/api/v1/write"
+    #   tls:
+    #     insecure: true
+    #   resource_to_telemetry_conversion:
+    #     enabled: true
+
     prometheusremotewrite:
-      endpoint: "http://prom-prometheus-server.monitoring.svc.cluster.local:9090/api/v1/write"
-      tls:
-        insecure: true
-      resource_to_telemetry_conversion:
-        enabled: true
+      endpoint: "http://vm-victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write"
+      # 如需添加标签、压缩可开启
+      # compression: zstd
 
-    # 3. 日志导出到 Elasticsearch
+    # ======================
+    # 3. 日志 Logs 导出
+    # ======================
+
+    # 日志导出到 Elasticsearch
     elasticsearch:
       endpoints:
         - "http://es-elasticsearch.monitoring.svc.cluster.local:9200"
@@ -82,13 +105,14 @@ config:
     debug:
       verbosity: normal
 
-  # 管道分流：Trace / Metrics / Logs 各自走不同导出器
+  # 管道分流：Trace / Metrics / Logs 各自走不同导出器， 类型名/自定义名：例如otel/tempo，就是otel格式，名字叫tempo
+  # ！！！需要按照上面的exporter来填写
   service:
     pipelines:
       traces:
         receivers: [otlp]
         processors: [memory_limiter, batch]
-        exporters: [otlp/jaeger, debug]
+        exporters: [otlp/tempo, debug]
 
       metrics:
         receivers: [otlp]
