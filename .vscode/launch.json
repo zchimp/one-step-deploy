@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Agent(main)",
+            "type": "python",
+            "request": "launch",
+            "module": "python_learning.main",
+            "cwd": "${workspaceFolder}/python-learning",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

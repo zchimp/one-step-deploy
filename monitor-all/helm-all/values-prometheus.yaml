@@ -1,0 +1,54 @@
+# 只做存储用，不使用其他功能
+# values-prometheus.yaml
+server:
+  # 开启持久化
+  persistentVolume:
+    enabled: true
+    storageClass: "local-path"
+    size: 30Gi
+
+  # 启动参数：开启OTLP接收
+  extraArgs:
+    web.enable-remote-write-receiver: ""
+
+  # Service暴露外网 NodePort
+  service:
+    type: NodePort
+    nodePort: 9090    # 自定义端口 30000~32767, 指定9090需要修改k8s自定义端口范围
+    servicePort: 9090
+
+  # 核心：scrape_configs: [] 彻底关闭所有Prom主动拉取采集
+  global:
+    scrape_interval: 15s
+    evaluation_interval: 15s
+  # 启动参数：开启OTLP接收
+  remoteWrite:
+    - url: "http://127.0.0.1:9090/api/v1/write"
+      queue_config:
+        capacity: 10000
+        max_shards: 10
+        batch_send_deadline: 5s
+
+  # 空列表=无任何自动抓取
+  scrape_configs: []
+  tsdb:
+    # OTLP时序乱序，必须开启30min乱序写入，不开的话默认同一series时序递增才行
+    out_of_order_time_window: 30m 
+    
+  resources:
+    limits:
+      cpu: 2
+      memory: 6Gi
+    requests:
+      cpu: 1m
+      memory: 4Gi
+  
+# 不需要内置exporter全部关闭
+prometheus-node-exporter:
+  enabled: false
+kube-state-metrics:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
+alertmanager:
+  enabled: false

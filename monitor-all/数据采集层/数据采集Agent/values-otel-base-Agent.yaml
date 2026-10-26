@@ -1,0 +1,147 @@
+# 1. ConfigMap：Collector 主配置（默认无任何采集）
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-agent-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    extensions:
+      health_check:
+      pprof:
+
+    receivers:
+
+
+    processors:
+      batch:
+        send_batch_size: 1024
+        timeout: 10s
+      memory_limiter:
+        check_interval: 2s
+        limit_percentage: 70
+        spike_limit_percentage: 20
+
+    exporters:
+      # 预留OTLP远程后端
+      otlp:
+        endpoint: "placeholder:4317"
+        tls:
+          insecure: true
+
+    service:
+      extensions: [health_check, pprof]
+      pipelines:
+        # 三条管道全部注释，无数据流转
+        # traces:
+        #   receivers: [otlp]
+        #   processors: [batch, memory_limiter]
+        #   exporters: [otlp]
+        # metrics:
+        #   receivers: [otlp]
+        #   processors: [batch, memory_limiter]
+        #   exporters: [otlp]
+        # logs:
+        #   receivers: [otlp, filelog]
+        #   processors: [batch, memory_limiter]
+        #   exporters: [otlp]
+
+---
+
+# 2. RBAC 权限（Agent节点采集宿主机/容器需要）
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-agent-sa
+  namespace: monitoring
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-agent-clusterrole
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/stats
+      - pods
+      - namespaces
+    verbs: ["get", "list", "watch"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-agent-clusterrolebinding
+subjects:
+  - kind: ServiceAccount
+    name: otel-agent-sa
+    namespace: monitoring
+roleRef:
+  kind: ClusterRole
+  name: otel-agent-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+# 3. DaemonSet 节点级Agent部署
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-agent
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: opentelemetry-agent
+  template:
+    metadata:
+      labels:
+        app: opentelemetry-agent
+    spec:
+      serviceAccountName: otel-agent-sa
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.109.0
+          command:
+            - "/otelcol-contrib"
+            - "--config=/conf/config.yaml"
+          ports:
+            - containerPort: 4317
+              name: otlp-grpc
+              hostPort: 4317
+            - containerPort: 4318
+              name: otlp-http
+              hostPort: 4318
+          volumeMounts:
+            - name: config-volume
+              mountPath: /conf
+            # 日志挂载（后续开filelog采集需要）
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+              readOnly: true
+            - name: host-logs
+              mountPath: /var/log
+              readOnly: true
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: otel-agent-config
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+        - name: host-logs
+          hostPath:
+            path: /var/log

@@ -1,0 +1,21 @@
+# values-local-path-provisioner.yaml
+image:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/rancher/local-path-provisioner
+  tag: v0.0.36
+  pullPolicy: IfNotPresent
+
+helperImage:
+  repository: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/busybox
+  tag: latest
+
+nodePathMap:
+  # 默认配置，默认会创建在这
+  - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+    paths:
+      - /opt/local-path-provisioner
+  - node: zhaohui-2
+    paths:
+      - /disk202
+  - node: zhaohui-3
+    paths:
+      - /disk203

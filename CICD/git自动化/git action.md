@@ -5,6 +5,7 @@ github项目设置中，左侧导航栏找到Secrets and variables，添加以�
 一般就是阿里云仓库镜像地址，registry.cn-xxxx.aliyuncs.com还有自己的账号和密码
 
 在项目根目录新建一个名为.github/workflows/build.yml的文件，内容如下：
+
 ```yaml
 # github
 name: Build Docker & Push Private Registry

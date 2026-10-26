@@ -1,0 +1,47 @@
+# pv-node2.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-node2
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: localstorage
+  persistentVolumeReclaimPolicy: Retain
+  local:
+    # 替换为本机分区
+    path: /disk202
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            # 修改成实际节点名称
+            values: ["zhaohui-2"] 
+---
+# pv-node3.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-node3
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: localstorage
+  persistentVolumeReclaimPolicy: Retain
+  local:
+    # 替换为本机分区
+    path: /disk203
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            # 修改成实际节点名称
+            values: ["zhaohui-3"] 

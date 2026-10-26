@@ -1,0 +1,64 @@
+# values-jaeger.yaml
+config:
+  extensions:
+    jaeger_storage:
+      backends:
+        primary_store:
+          elasticsearch:
+            # index_prefix: jaeger
+            server_urls: ["http://es-elasticsearch.monitoring.svc.cluster.local:9200"]
+            # username: elastic
+            # password: changeme
+          memory:
+            max_traces: 100000
+        archive_store:
+          elasticsearch:
+            # index_prefix: jaeger-archive
+            server_urls: ["http://es-elasticsearch.monitoring.svc.cluster.local:9200"]
+            # username: elastic
+            # password: changeme
+          memory:
+            max_traces: 100000
+global:
+  imageRegistry: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io
+storage:
+  type: memory # v2版本jaeger不读取这个字段，无所谓
+  elasticsearch:
+    url: http://es-elasticsearch.monitoring.svc.cluster.local:9200 # 新增这行给定时任务用
+    tls:
+      insecure: true
+jaeger:
+  enabled: true
+  replicas: 1
+  # 新增下面service
+  service:
+    type: NodePort
+    nodePort: 16686 # UI外网端口
+    headless: false
+    collector:
+      otlp:
+        grpc:
+          name: otlp-grpc
+        http:
+          name: otlp-http
+  image:
+    registry: "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io"
+    repository: jaegertracing/jaeger
+    tag: "2.13.0"
+    pullPolicy: IfNotPresent
+
+# 关闭独立组件
+agent:
+  enabled: false
+collector:
+  enabled: false
+query:
+  enabled: false
+
+# es清理任务
+esIndexCleaner:
+  enabled: false
+esRollover:
+  enabled: false
+esLookback:
+  enabled: false

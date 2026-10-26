@@ -7,21 +7,23 @@ macOS/Linux：~/.claude/settings.json
 
 {
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "xxxx token",
+    "ANTHROPIC_AUTH_TOKEN": "tokenxxx",
     "ANTHROPIC_BASE_URL": "https://open.bigmodel.cn/api/anthropic",
-    "ANTHROPIC_MODEL": "glm-5.2[1m]",
-    "ANTHROPIC_SMALL_FAST_MODEL": "glm-4.5-air",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.2[1m]",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5.2[1m]",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.2[1m]",
+    "ANTHROPIC_MODEL": "glm-4-flash",
+    "ANTHROPIC_SMALL_FAST_MODEL": "glm-4-flash",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4-flash",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4-flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4-flash",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   },
   "permissions": {
     "allow": [
-      "mcp__pencil"
     ]
   },
-  "theme": "dark"
+  "theme": "dark",
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true
+  }
 }
 
 按照 Go 项目规范重构代码结构，禁止所有逻辑堆在 main.go：
